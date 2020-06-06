@@ -24,6 +24,8 @@ def pre_processing_and_samples():
     train_set = torchvision.datasets.CIFAR10(root='./cifardata', train=True, download=True, transform=transform)
     test_set = torchvision.datasets.CIFAR10(root='./cifardata', train=False, download=True, transform=transform)
 
+    # Image dimensions: (C x H x W) = (3 x 32 x 32)
+
     # CIFAR10 image categories
     classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
@@ -58,12 +60,15 @@ class SimpleCNN(torch.nn.Module):
         super(SimpleCNN, self).__init__()
 
         # Feature extraction
-        self.conv1 = torch.nn.Conv2d(in_channels=3, out_channels=18, kernel_size=3, stride=1, padding=1)
-        self.pool = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
+        # Channels =/= input/output (channels is number of filter outputs; need to worry about FILTER dimensions)
+        self.conv1 = torch.nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, stride=1, padding=1)  # --> (32, 32, 32)
+        self.pool = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)  # --> (32, 16, 16)
+        self.conv2 = torch.nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=1, padding=1)  # --> (64, 16, 16)
+        self.pool = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)  # --> (64, 8, 8)
 
         # Classification -- 18 in channels with 16 x 16 pixel-sized images = 4608 input nodes
         # 64 output nodes
-        self.fc1 = torch.nn.Linear(18 * 16 * 16, 64)
+        self.fc1 = torch.nn.Linear(64 * 8 * 8, 64)
 
         self.fc2 = torch.nn.Linear(64, 10)
 
@@ -71,13 +76,17 @@ class SimpleCNN(torch.nn.Module):
         self.output = torch.nn.Softmax(dim=1)  # Usually use dim = 1; means across (row)
 
     def forward(self, x):
-        # Pass through convolutional layer
+        # Pass through convolutional layer 1
         x = self.conv1(x)
         x = F.relu(x)
         x = self.pool(x)
 
+        x = self.conv2(x)
+        x = F.relu(x)
+        x = self.pool(x)
+
         # Need to flatten data from 18 channels to 4608 input nodes, i.e. (18, 16, 16) --> (1, 4608)
-        x = x.view(-1, 18 * 16 * 16)
+        x = x.view(-1, 64 * 8 * 8)
         x = self.fc1(x)
 
         x = self.fc2(x)
@@ -212,6 +221,6 @@ if __name__ == "__main__":
         CNN = nn.DataParallel(CNN)
 
     CNN.to(device)
-    trainCNN(net=CNN, batch_size=64, n_epochs=20, learning_rate=0.001,
+    trainCNN(net=CNN, batch_size=32, n_epochs=20, learning_rate=0.001,
              train_set=train_set, train_sampler=train_sampler, val_sampler=val_sampler)
     test(net=CNN, test_set=test_set, test_sampler=test_sampler)
