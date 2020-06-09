@@ -201,6 +201,8 @@ def train_model(model, batch_size, learning_rate, train_set, train_sampler, val_
                 outputs = model(inputs)
                 loss = criterion(outputs, labels)  # Loss size is Tensor object
 
+            running_loss += loss
+
             # Backprop
             loss.backward()  # Only gets called on
             optimizer.step()
@@ -211,7 +213,6 @@ def train_model(model, batch_size, learning_rate, train_set, train_sampler, val_
                     epoch + 1, int(100 * (i + 1) / n_batches), running_loss / print_every, time.time() - since))
                 # Reset running loss and time
                 running_loss = 0.0
-                start_time = time.time()
 
         # Validation
         model.eval()
