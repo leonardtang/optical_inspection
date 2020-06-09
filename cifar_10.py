@@ -65,10 +65,12 @@ class SimpleCNN(torch.nn.Module):
         self.pool = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)  # --> (32, 16, 16)
         self.conv2 = torch.nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=1, padding=1)  # --> (64, 16, 16)
         self.pool = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)  # --> (64, 8, 8)
+        self.conv2 = torch.nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, stride=1,padding=1)  # --> (128, 8, 8)
+        self.pool = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)  # --> (128, 4, 4)
 
         # Classification -- 18 in channels with 16 x 16 pixel-sized images = 4608 input nodes
         # 64 output nodes
-        self.fc1 = torch.nn.Linear(64 * 8 * 8, 64)
+        self.fc1 = torch.nn.Linear(128 * 4 * 4, 64)
 
         self.fc2 = torch.nn.Linear(64, 10)
 
