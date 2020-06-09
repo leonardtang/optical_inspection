@@ -216,10 +216,14 @@ if __name__ == "__main__":
     # Using GPU for training
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(device)
+    if torch.cuda.is_available():
+        torch.set_default_tensor_type('torch.cuda.FloatTensor')
+        print("cuda is available")
 
     # Multiple GPUs
     if torch.cuda.device_count() > 1:
         CNN = nn.DataParallel(CNN)
+        torch.set_default_tensor_type('torch.cuda.FloatTensor')
 
     CNN.to(device)
     trainCNN(net=CNN, batch_size=32, n_epochs=20, learning_rate=0.001,
