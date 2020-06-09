@@ -223,7 +223,7 @@ def train_model(model, batch_size, learning_rate, train_set, train_sampler, val_
             for inputs, labels in val_loader:
                 val_outputs = model(inputs)
                 _, predicted = torch.max(val_outputs.detach(), dim=1)
-                val_loss_size = loss(val_outputs, labels)
+                val_loss_size = criterion(val_outputs, labels)
                 epoch_val_loss += val_loss_size
                 val_correct += (predicted == labels).double().sum().item()
                 val_total += labels.size(0)
