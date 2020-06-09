@@ -153,7 +153,6 @@ def trainCNN(net, batch_size, n_epochs, learning_rate, train_set, train_sampler,
 
             optimizer.zero_grad()
             inputs, labels = data
-            inputs, labels = inputs.to(device), labels.to(device)
             # No longer need to wrap Tensor in Variable Class
             # Tensors now support autograd (i.e. backward()) and store gradient values
             # inputs, labels = Variable(inputs), Variable(labels)
