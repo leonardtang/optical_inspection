@@ -181,7 +181,6 @@ def trainCNN(net, batch_size, n_epochs, learning_rate, train_set, train_sampler,
         val_total = 0
         with torch.no_grad():
             for inputs, labels in val_loader:
-                inputs, labels = inputs.to(device), labels.to(device)
                 val_outputs = net(inputs)
                 # _ is array of max values of each Tensor; predicted is array of corresponding indices (labels/argmax)
                 _, predicted = torch.max(val_outputs.detach(), dim=1)
@@ -205,7 +204,6 @@ def test(net, test_set, test_sampler):
         # For each testing mini-batch
         for data in test_loader:
             inputs, labels = data
-            inputs, labels = inputs.to(device), labels.to(device)
             outputs = net(inputs)
             # _ is array of max values of each Tensor; predicted is array of corresponding indices (labels/argmax)
             _, predicted = torch.max(outputs.detach(), dim=1)
@@ -215,14 +213,14 @@ def test(net, test_set, test_sampler):
     print('Testing accuracy = % d %%' % (100 * correct / total))
 
 
-if __name__ == "__main__":
-
+def run_simple_CNN():
+    """ Training and testing simple CNN architecture """
     [train_set, test_set, train_sampler, val_sampler, test_sampler] = pre_processing_and_samples()
     CNN = SimpleCNN()
     # Using GPU for training
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(device)
-    if torch.cuda.is_available():
+    if torch.cuda.is_availadeviceble():
         torch.set_default_tensor_type('torch.cuda.FloatTensor')
         print("cuda is available")
 
@@ -235,3 +233,9 @@ if __name__ == "__main__":
     trainCNN(net=CNN, batch_size=32, n_epochs=20, learning_rate=0.001,
              train_set=train_set, train_sampler=train_sampler, val_sampler=val_sampler)
     test(net=CNN, test_set=test_set, test_sampler=test_sampler)
+
+
+if __name__ == "__main__":
+
+    run_simple_CNN()
+
