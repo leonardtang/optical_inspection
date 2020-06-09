@@ -199,6 +199,7 @@ def test(net, test_set, test_sampler):
         # For each testing mini-batch
         for data in test_loader:
             inputs, labels = data
+            inputs, labels = inputs.to(device), labels.to(device)
             outputs = net(inputs)
             # _ is array of max values of each Tensor; predicted is array of corresponding indices (labels/argmax)
             _, predicted = torch.max(outputs.detach(), dim=1)
