@@ -219,7 +219,7 @@ def run_simple_CNN():
     # Using GPU for training
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(device)
-    if torch.cuda.is_availadeviceble():
+    if torch.cuda.is_available():
         torch.set_default_tensor_type('torch.cuda.FloatTensor')
         print("cuda is available")
 
