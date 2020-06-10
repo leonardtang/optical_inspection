@@ -49,17 +49,17 @@ def pre_processing_and_samples():
 
 def get_train_loader(batch_size, train_set, train_sampler):
     """ Gets a batch sample of training data; called during training process for each batch """
-    train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, sampler=train_sampler, num_workers=4)
+    train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, sampler=train_sampler, num_workers=0)
     return train_loader
 
 
 def get_val_loader(train_set, val_sampler):
-    val_loader = torch.utils.data.DataLoader(train_set, batch_size=128, sampler=val_sampler, num_workers=4)
+    val_loader = torch.utils.data.DataLoader(train_set, batch_size=128, sampler=val_sampler, num_workers=0)
     return val_loader
 
 
 def get_test_loader(test_set, test_sampler):
-    test_loader = torch.utils.data.DataLoader(test_set, batch_size=4, sampler=test_sampler, num_workers=4)
+    test_loader = torch.utils.data.DataLoader(test_set, batch_size=4, sampler=test_sampler, num_workers=0)
     return test_loader
 
 
@@ -280,11 +280,11 @@ def run_NN():
     if torch.cuda.is_available():
         print("cuda is available")
 
-    # Multiple GPUs
-    if torch.cuda.device_count() > 1:
-        model = nn.DataParallel(model)
+        # Multiple GPUs
+        if torch.cuda.device_count() > 1:
+            model = nn.DataParallel(model)
 
-    model.to(device)
+        model.to(device)
 
     # Gives the best model (best weights)
     model, hist = train_model(model=model, batch_size=32, learning_rate=0.001,
