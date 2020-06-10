@@ -49,17 +49,17 @@ def pre_processing_and_samples():
 
 def get_train_loader(batch_size, train_set, train_sampler):
     """ Gets a batch sample of training data; called during training process for each batch """
-    train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, sampler=train_sampler, num_workers=0)
+    train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, sampler=train_sampler, num_workers=8)
     return train_loader
 
 
 def get_val_loader(train_set, val_sampler):
-    val_loader = torch.utils.data.DataLoader(train_set, batch_size=128, sampler=val_sampler, num_workers=0)
+    val_loader = torch.utils.data.DataLoader(train_set, batch_size=128, sampler=val_sampler, num_workers=8)
     return val_loader
 
 
 def get_test_loader(test_set, test_sampler):
-    test_loader = torch.utils.data.DataLoader(test_set, batch_size=4, sampler=test_sampler, num_workers=0)
+    test_loader = torch.utils.data.DataLoader(test_set, batch_size=4, sampler=test_sampler, num_workers=8)
     return test_loader
 
 
@@ -140,7 +140,7 @@ model_ft, input_size = initialize_model(model_name, num_classes, feature_extract
 # print(model_ft)
 
 
-def train_model(model, batch_size, learning_rate, train_set, train_sampler, val_sampler, num_epochs=25,
+def train_model(model, device, batch_size, learning_rate, train_set, train_sampler, val_sampler, num_epochs=25,
                 is_inception=False):
 
     print("===== HYPERPARAMETERS =====")
@@ -183,7 +183,6 @@ def train_model(model, batch_size, learning_rate, train_set, train_sampler, val_
         print('-' * 10)
 
         # DataLoader requires CPU Tensors, now can switch to GPU Tensors
-        torch.set_default_tensor_type('torch.cuda.FloatTensor')
         model.train()
         running_loss = 0.0  # Do we actually need this?
         running_corrects = 0.0
@@ -199,6 +198,7 @@ def train_model(model, batch_size, learning_rate, train_set, train_sampler, val_
 
             else:
                 inputs, labels = data
+                inputs, labels = inputs.to(device), labels.to(device)
                 optimizer.zero_grad()
                 outputs = model(inputs)
                 loss = criterion(outputs, labels)  # Loss size is Tensor object
@@ -224,6 +224,7 @@ def train_model(model, batch_size, learning_rate, train_set, train_sampler, val_
         val_total = 0
         with torch.no_grad():
             for inputs, labels in val_loader:
+                inputs, labels = inputs.to(device), labels.to(device)
                 val_outputs = model(inputs)
                 _, predicted = torch.max(val_outputs.detach(), dim=1)
                 val_loss_size = criterion(val_outputs, labels)
@@ -273,10 +274,10 @@ def test(model, test_set, test_sampler):
 def run_NN():
     """ Training and testing simple CNN architecture """
     [train_set, test_set, train_sampler, val_sampler, test_sampler] = pre_processing_and_samples()
-    model = initialize_model(model_name=model_name, num_classes=num_classes, feature_extract=True)[0]
     # Using GPU for training
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(device)
+    model = initialize_model(model_name=model_name, num_classes=num_classes, feature_extract=True)[0]
     if torch.cuda.is_available():
         print("cuda is available")
 
@@ -287,7 +288,7 @@ def run_NN():
         model.to(device)
 
     # Gives the best model (best weights)
-    model, hist = train_model(model=model, batch_size=32, learning_rate=0.001,
+    model, hist = train_model(model=model, device=device, batch_size=32, learning_rate=0.001,
                               train_set=train_set, train_sampler=train_sampler, val_sampler=val_sampler,
                               num_epochs=num_epochs)
 
