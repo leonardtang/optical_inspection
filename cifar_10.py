@@ -103,20 +103,20 @@ class SimpleCNN(torch.nn.Module):
 def get_train_loader(batch_size, train_set, train_sampler):
     """ Gets a batch sample of training data
         Called in the training method (for loop) """
-    train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, sampler=train_sampler, num_workers=2)
+    train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, sampler=train_sampler, num_workers=4)
 
     return train_loader
 
 
 # Why does val loader have a constant batch size?
 def get_val_loader(train_set, val_sampler):
-    val_loader = torch.utils.data.DataLoader(train_set, batch_size=128, sampler=val_sampler, num_workers=2)
+    val_loader = torch.utils.data.DataLoader(train_set, batch_size=128, sampler=val_sampler, num_workers=4)
     return val_loader
 
 
 # Why does test loader have a constant batch size?
 def get_test_loader(test_set, test_sampler):
-    test_loader = torch.utils.data.DataLoader(test_set, batch_size=4, sampler=test_sampler, num_workers=2)
+    test_loader = torch.utils.data.DataLoader(test_set, batch_size=4, sampler=test_sampler, num_workers=4)
     return test_loader
 
 

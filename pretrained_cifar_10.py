@@ -182,6 +182,8 @@ def train_model(model, batch_size, learning_rate, train_set, train_sampler, val_
         print('Epoch {}/{}'.format(epoch, num_epochs - 1))
         print('-' * 10)
 
+        # DataLoader requires CPU Tensors, now can switch to GPU Tensors
+        torch.set_default_tensor_type('torch.cuda.FloatTensor')
         model.train()
         running_loss = 0.0  # Do we actually need this?
         running_corrects = 0.0
@@ -276,13 +278,11 @@ def run_NN():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(device)
     if torch.cuda.is_available():
-        torch.set_default_tensor_type('torch.cuda.FloatTensor')
         print("cuda is available")
 
     # Multiple GPUs
     if torch.cuda.device_count() > 1:
         model = nn.DataParallel(model)
-        torch.set_default_tensor_type('torch.cuda.FloatTensor')
 
     model.to(device)
 
