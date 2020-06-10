@@ -120,7 +120,7 @@ def get_test_loader(test_set, test_sampler):
     return test_loader
 
 
-def trainCNN(net, batch_size, n_epochs, learning_rate, train_set, train_sampler, val_sampler):
+def trainCNN(net, device, batch_size, n_epochs, learning_rate, train_set, train_sampler, val_sampler):
     """ The full training process (i.e. not just one iteration) """
 
     print("===== HYPERPARAMETERS =====")
@@ -153,6 +153,7 @@ def trainCNN(net, batch_size, n_epochs, learning_rate, train_set, train_sampler,
 
             optimizer.zero_grad()
             inputs, labels = data
+            inputs, labels = inputs.to(device), labels.to(device)
             # No longer need to wrap Tensor in Variable Class
             # Tensors now support autograd (i.e. backward()) and store gradient values
             # inputs, labels = Variable(inputs), Variable(labels)
@@ -180,6 +181,7 @@ def trainCNN(net, batch_size, n_epochs, learning_rate, train_set, train_sampler,
         val_total = 0
         with torch.no_grad():
             for inputs, labels in val_loader:
+                inputs, labels = inputs.to(device), labels.to(device)
                 val_outputs = net(inputs)
                 # _ is array of max values of each Tensor; predicted is array of corresponding indices (labels/argmax)
                 _, predicted = torch.max(val_outputs.detach(), dim=1)
@@ -194,7 +196,7 @@ def trainCNN(net, batch_size, n_epochs, learning_rate, train_set, train_sampler,
         print("Training finished, took {:.2f}s".format(time.time() - training_start_time))
 
 
-def test(net, test_set, test_sampler):
+def test(net, device, test_set, test_sampler):
     correct = 0
     total = 0
     test_loader = get_test_loader(test_set, test_sampler)
@@ -203,6 +205,7 @@ def test(net, test_set, test_sampler):
         # For each testing mini-batch
         for data in test_loader:
             inputs, labels = data
+            inputs, labels = inputs.to(device), labels.to(device)
             outputs = net(inputs)
             # _ is array of max values of each Tensor; predicted is array of corresponding indices (labels/argmax)
             _, predicted = torch.max(outputs.detach(), dim=1)
@@ -220,18 +223,16 @@ def run_simple_CNN():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(device)
     if torch.cuda.is_available():
-        torch.set_default_tensor_type('torch.cuda.FloatTensor')
         print("cuda is available")
+        CNN.to(device)
 
     # Multiple GPUs
     if torch.cuda.device_count() > 1:
         CNN = nn.DataParallel(CNN)
-        torch.set_default_tensor_type('torch.cuda.FloatTensor')
 
-    CNN.to(device)
-    trainCNN(net=CNN, batch_size=32, n_epochs=20, learning_rate=0.001,
+    trainCNN(net=CNN, device=device, batch_size=32, n_epochs=20, learning_rate=0.001,
              train_set=train_set, train_sampler=train_sampler, val_sampler=val_sampler)
-    test(net=CNN, test_set=test_set, test_sampler=test_sampler)
+    test(net=CNN, device=device, test_set=test_set, test_sampler=test_sampler)
 
 
 if __name__ == "__main__":
