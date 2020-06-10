@@ -254,7 +254,7 @@ def train_model(model, device, batch_size, learning_rate, train_set, train_sampl
     return model, val_acc_history
 
 
-def test(model, test_set, test_sampler):
+def test(model, device, test_set, test_sampler):
     correct = 0
     total = 0
     test_loader = get_test_loader(test_set, test_sampler)
@@ -263,6 +263,7 @@ def test(model, test_set, test_sampler):
         # For each testing mini-batch
         for data in test_loader:
             inputs, labels = data
+            inputs, labels = inputs.to(device), labels.to(device)
             outputs = model(inputs)
             _, predicted = torch.max(outputs.detach(), dim=1)
             correct += (predicted == labels).double().sum().item()  # Double corrects for testing batch size
@@ -303,7 +304,7 @@ def run_NN():
     plt.legend()
     plt.show()
 
-    test(model=model, test_set=test_set, test_sampler=test_sampler)
+    test(model=model, device=device, test_set=test_set, test_sampler=test_sampler)
 
 
 if __name__ == "__main__":
