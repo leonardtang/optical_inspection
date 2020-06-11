@@ -15,7 +15,7 @@ import copy
 data_dir = "./cifardata"
 
 # Models to choose from [resnet, alexnet, vgg, squeezenet, densenet, inception]
-model_name = "vgg"
+model_name = "alexnet"
 num_classes = 10
 batch_size = 32
 num_epochs = 15
