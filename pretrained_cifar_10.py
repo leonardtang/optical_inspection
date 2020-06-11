@@ -28,11 +28,16 @@ def pre_processing_and_samples():
     np.random.seed(seed)  # For calling np.random()
     torch.manual_seed(seed)  # For calling torch.rand()
 
-    transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.485, 0.456, 0.406),
-                                                                                (0.229, 0.224, 0.225))])
-    # No augmentation for either (train + val) or test sets
-    train_set = torchvision.datasets.CIFAR10(root='./cifardata', train=True, download=True, transform=transform)
-    test_set = torchvision.datasets.CIFAR10(root='./cifardata', train=False, download=True, transform=transform)
+    # Scaling UP (3 x 32 x 32 --> 3 x 224 x 224); augmenting (horizontal flip) for data robustness
+    transform_train = transforms.Compose([transforms.Resize(224),
+                                          transforms.RandomHorizontalFlip(), transforms.ToTensor(),
+                                          transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))])
+
+    transform_test = transforms.Compose([transforms.Resize(224), transforms.ToTensor(),
+                                         transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))])
+
+    train_set = torchvision.datasets.CIFAR10(root='./cifardata', train=True, download=True, transform=transform_train)
+    test_set = torchvision.datasets.CIFAR10(root='./cifardata', train=False, download=True, transform=transform_test)
 
     number_training_samples = 20000
     train_sampler = SubsetRandomSampler(np.arange(number_training_samples, dtype=np.int64))
@@ -137,12 +142,13 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Tr
 
 # Initialize pre-trained model
 model_ft, input_size = initialize_model(model_name, num_classes, feature_extract, use_pretrained=True)
+
+
 # print(model_ft)
 
 
 def train_model(model, device, batch_size, learning_rate, train_set, train_sampler, val_sampler, num_epochs=25,
                 is_inception=False):
-
     print("===== HYPERPARAMETERS =====")
     print("batch_size=", batch_size)
     print("epochs=", num_epochs)
@@ -308,6 +314,4 @@ def run_NN():
 
 
 if __name__ == "__main__":
-
     run_NN()
-
