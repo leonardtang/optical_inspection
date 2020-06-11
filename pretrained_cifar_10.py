@@ -190,8 +190,8 @@ def train_model(model, device, batch_size, learning_rate, train_set, train_sampl
 
         # DataLoader requires CPU Tensors, now can switch to GPU Tensors
         model.train()
-        running_loss = 0.0  # Do we actually need this?
-        running_corrects = 0.0
+        training_loss = 0.0
+        training_corrects = 0.0  # Do we actually need this?
 
         # Training
         for i, data in enumerate(train_loader, 0):
@@ -209,7 +209,7 @@ def train_model(model, device, batch_size, learning_rate, train_set, train_sampl
                 outputs = model(inputs)
                 loss = criterion(outputs, labels)  # Loss size is Tensor object
 
-            running_loss += loss
+            training_loss += loss
 
             # Backprop
             loss.backward()  # Only gets called on
@@ -218,14 +218,13 @@ def train_model(model, device, batch_size, learning_rate, train_set, train_sampl
             # Print stats after every 10 mini-batches
             if (i + 1) % (print_every + 1) == 0:
                 print("Epoch {}, {:d}% \t train_loss: {:.2f} took: {:.2f}s".format(
-                    epoch + 1, int(100 * (i + 1) / n_batches), running_loss / print_every, time.time() - since))
+                    epoch + 1, int(100 * (i + 1) / n_batches), training_loss / print_every, time.time() - since))
                 # Reset running loss and time
-                running_loss = 0.0
+                training_loss = 0.0
 
         # Validation
         model.eval()
         epoch_val_loss = 0  # Validation loss for the epoch
-        val_loader = get_val_loader(train_set, val_sampler)
         val_correct = 0
         val_total = 0
         with torch.no_grad():
@@ -247,7 +246,10 @@ def train_model(model, device, batch_size, learning_rate, train_set, train_sampl
         if val_accuracy > best_acc:
             best_acc = val_accuracy
             best_model_wts = copy.deepcopy(model.state_dict())
-            val_acc_history.append(val_accuracy)
+
+        # Keep track of stats for plotting
+
+        val_acc_history.append(val_accuracy)
 
         print()
 
@@ -291,8 +293,9 @@ def run_NN():
         # Multiple GPUs
         if torch.cuda.device_count() > 1:
             model = nn.DataParallel(model)
+            print("Model wrapped in Data Parallel")
 
-        model.to(device)
+    model.to(device)
 
     # Gives the best model (best weights)
     model, hist = train_model(model=model, device=device, batch_size=32, learning_rate=0.001,
@@ -300,11 +303,10 @@ def run_NN():
                               num_epochs=num_epochs)
 
     # Plot performance over training epochs
-    ohist = [h.cpu().numpy() for h in hist]
     plt.title("Validation Accuracy vs. Number of Training Epochs")
     plt.xlabel("Training Epochs")
     plt.ylabel("Validation Accuracy")
-    plt.plot(range(1, num_epochs + 1), ohist, label="Pretrained")
+    plt.plot(range(1, num_epochs + 1), hist, label="Pretrained")
     plt.ylim((0, 1.))
     plt.xticks(np.arange(1, num_epochs + 1, 1.0))
     plt.legend()
