@@ -176,7 +176,10 @@ def train_model(model, device, batch_size, learning_rate, train_set, train_sampl
                 print("\t", name)
 
     since = time.time()
-    val_acc_history = []  # Stores validation accuracy of each epoch
+    val_loss_history = []
+    val_acc_history = []
+    train_loss_history = []
+    train_acc_history = []
     best_model_wts = copy.deepcopy(model.state_dict())
     best_acc = 0.0
 
@@ -225,8 +228,12 @@ def train_model(model, device, batch_size, learning_rate, train_set, train_sampl
                 training_loss += batch_loss
                 batch_loss = 0.0
 
-        print("Average Training Loss: {:.2f}".format(training_loss / n_batches))
-        print("Training Accuracy: {:.2f}").format(training_corrects / (n_batches * batch_size))
+        average_train_loss = training_loss / n_batches
+        print("Average Training Loss: {:.2f}".format(average_train_loss))
+        average_train_accuracy = training_corrects / (n_batches * batch_size)
+        print("Training Accuracy: {:.2f}").format(average_train_accuracy)
+        train_loss_history.append(average_train_loss)
+        train_acc_history.append(average_train_accuracy)
 
         # Validation
         model.eval()
@@ -255,8 +262,8 @@ def train_model(model, device, batch_size, learning_rate, train_set, train_sampl
 
         # Keep track of stats for plotting
 
+        val_loss_history.append(epoch_val_loss)
         val_acc_history.append(val_accuracy)
-
         print()
 
     time_elapsed = time.time() - since
@@ -265,7 +272,7 @@ def train_model(model, device, batch_size, learning_rate, train_set, train_sampl
 
     # Best model weights loaded for testing
     model.load_state_dict(best_model_wts)
-    return model, val_acc_history
+    return model, train_loss_history, train_acc_history, val_loss_history, val_acc_history
 
 
 def test(model, device, test_set, test_sampler):
@@ -304,19 +311,29 @@ def run_NN():
     model.to(device)
 
     # Gives the best model (best weights)
-    model, hist = train_model(model=model, device=device, batch_size=32, learning_rate=0.01,
-                              train_set=train_set, train_sampler=train_sampler, val_sampler=val_sampler,
-                              num_epochs=num_epochs)
+    model, train_loss_hist, train_acc_hist, val_loss_hist, val_acc_hist = train_model(model=model, device=device,
+                                                                                      batch_size=32, learning_rate=0.01,
+                                                                                      train_set=train_set,
+                                                                                      train_sampler=train_sampler,
+                                                                                      val_sampler=val_sampler,
+                                                                                      num_epochs=num_epochs)
 
-    # Plot performance over training epochs
-    plt.title("Validation Accuracy vs. Number of Training Epochs")
-    plt.xlabel("Training Epochs")
-    plt.ylabel("Validation Accuracy")
-    plt.plot(range(1, num_epochs + 1), hist, label="Pretrained")
-    plt.ylim((0, 1.))
-    plt.xticks(np.arange(1, num_epochs + 1, 1.0))
-    plt.legend()
-    plt.show()
+    print(model)
+    print(train_loss_hist)
+    print(train_acc_hist)
+    print(val_loss_hist)
+    print(val_acc_hist)
+
+    # USE VISDOM HERE INSTEAD
+    # # Plot performance over training epochs
+    # plt.title("Validation Accuracy vs. Number of Training Epochs")
+    # plt.xlabel("Training Epochs")
+    # plt.ylabel("Validation Accuracy")
+    # plt.plot(range(1, num_epochs + 1), train_loss_hist, label="Pretrained")
+    # plt.ylim((0, 1.))
+    # plt.xticks(np.arange(1, num_epochs + 1, 1.0))
+    # plt.legend()
+    # plt.show()
 
     test(model=model, device=device, test_set=test_set, test_sampler=test_sampler)
 
