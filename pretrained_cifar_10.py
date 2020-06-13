@@ -39,7 +39,7 @@ def pre_processing_and_samples():
     train_set = torchvision.datasets.CIFAR10(root='./cifardata', train=True, download=True, transform=transform_train)
     test_set = torchvision.datasets.CIFAR10(root='./cifardata', train=False, download=True, transform=transform_test)
 
-    number_training_samples = 20000
+    number_training_samples = 50000
     train_sampler = SubsetRandomSampler(np.arange(number_training_samples, dtype=np.int64))
 
     number_val_samples = 5000
@@ -298,7 +298,7 @@ def run_NN():
     model.to(device)
 
     # Gives the best model (best weights)
-    model, hist = train_model(model=model, device=device, batch_size=32, learning_rate=0.001,
+    model, hist = train_model(model=model, device=device, batch_size=32, learning_rate=0.01,
                               train_set=train_set, train_sampler=train_sampler, val_sampler=val_sampler,
                               num_epochs=num_epochs)
 
