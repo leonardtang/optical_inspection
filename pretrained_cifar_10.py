@@ -190,8 +190,9 @@ def train_model(model, device, batch_size, learning_rate, train_set, train_sampl
 
         # DataLoader requires CPU Tensors, now can switch to GPU Tensors
         model.train()
+        batch_loss = 0.0
         training_loss = 0.0
-        training_corrects = 0.0  # Do we actually need this?
+        training_corrects = 0
 
         # Training
         for i, data in enumerate(train_loader, 0):
@@ -209,7 +210,8 @@ def train_model(model, device, batch_size, learning_rate, train_set, train_sampl
                 outputs = model(inputs)
                 loss = criterion(outputs, labels)  # Loss size is Tensor object
 
-            training_loss += loss
+            batch_loss += loss
+            training_corrects += (outputs == labels).double().sum().item()
 
             # Backprop
             loss.backward()  # Only gets called on
@@ -217,10 +219,14 @@ def train_model(model, device, batch_size, learning_rate, train_set, train_sampl
 
             # Print stats after every 10 mini-batches
             if (i + 1) % (print_every + 1) == 0:
-                print("Epoch {}, {:d}% \t train_loss: {:.2f} took: {:.2f}s".format(
-                    epoch + 1, int(100 * (i + 1) / n_batches), training_loss / print_every, time.time() - since))
+                print("Epoch {}, {:d}% \t batch_loss: {:.2f} took: {:.2f}s".format(
+                    epoch + 1, int(100 * (i + 1) / n_batches), batch_loss / print_every, time.time() - since))
                 # Reset running loss and time
-                training_loss = 0.0
+                training_loss += batch_loss
+                batch_loss = 0.0
+
+        print("Average Training Loss: {:.2f}".format(training_loss / n_batches))
+        print("Training Accuracy: {:.2f}").format(training_corrects / (n_batches * batch_size))
 
         # Validation
         model.eval()
