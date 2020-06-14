@@ -211,10 +211,11 @@ def train_model(model, device, batch_size, learning_rate, train_set, train_sampl
                 inputs, labels = inputs.to(device), labels.to(device)
                 optimizer.zero_grad()
                 outputs = model(inputs)
+                _, predicted = torch.max(outputs.detach(), dim=1)
                 loss = criterion(outputs, labels)  # Loss size is Tensor object
 
             batch_loss += loss
-            training_corrects += (outputs == labels).double().sum().item()
+            training_corrects += (predicted == labels).double().sum().item()
 
             # Backprop
             loss.backward()  # Only gets called on
