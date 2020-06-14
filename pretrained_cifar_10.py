@@ -232,7 +232,7 @@ def train_model(model, device, batch_size, learning_rate, train_set, train_sampl
         average_train_loss = training_loss / n_batches
         print("Average Training Loss: {:.2f}".format(average_train_loss))
         average_train_accuracy = training_corrects / (n_batches * batch_size)
-        print("Training Accuracy: {:.2f}").format(average_train_accuracy)
+        print("Training Accuracy: {:.2f}".format(average_train_accuracy))
         train_loss_history.append(average_train_loss)
         train_acc_history.append(average_train_accuracy)
 
