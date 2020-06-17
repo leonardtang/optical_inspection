@@ -347,7 +347,7 @@ def run_NN():
     ax2.set(xlabel="Training Epoch", ylabel="Accuracy")
     ax2.plot(range(1, num_epochs + 1), train_acc_hist, label="Training")
     ax2.plot(range(1, num_epochs + 1), val_acc_hist, label="Validation")
-    ax2.set_ylim((0, 100), axis=0, out=None)  # Sets y bounds
+    ax2.set_ylim(0, 100)  # Sets y bounds
     ax2.set_xticks(np.arange(1, num_epochs + 1, 1.0))
     ax2.legend()
 
