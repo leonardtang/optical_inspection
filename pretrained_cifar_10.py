@@ -337,7 +337,7 @@ def run_NN():
     ax1.plot(range(1, len(train_loss_hist) + 1), train_loss_hist, label="Training")
     ax1.plot(range(1, len(val_loss_hist) + 1), val_loss_hist, label="Validation")
     ax1.set_ylim(
-        (0, 1.25 * np.amax(np.concatenate(train_loss_hist, val_loss_hist), axis=0, out=None)))  # Sets y bounds
+        (0, 1.25 * np.amax(np.concatenate((train_loss_hist, val_loss_hist), axis=0, out=None))))  # Sets y bounds
     ax1.set_xticks(np.arange(1, num_epochs + 1, 1.0))
     ax1.legend()
 
