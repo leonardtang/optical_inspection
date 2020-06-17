@@ -251,7 +251,7 @@ def train_model(model, device, batch_size, learning_rate, train_set, train_sampl
                 val_correct += (predicted == labels).double().sum().item()
                 val_total += labels.size(0)
 
-            average_val_loss = epoch_val_loss / len(val_loader)
+            average_val_loss = epoch_val_loss / len(val_loader)  # / Number of val batches
             val_accuracy = 100 * val_correct / val_total
             print("Average validation loss = {:.2f}".format(average_val_loss))
             print("Validation accuracy = % d %%" % val_accuracy)
@@ -263,7 +263,7 @@ def train_model(model, device, batch_size, learning_rate, train_set, train_sampl
 
         # Keep track of stats for plotting
 
-        val_loss_history.append(epoch_val_loss)
+        val_loss_history.append(average_val_loss)
         val_acc_history.append(val_accuracy)
         print()
 
