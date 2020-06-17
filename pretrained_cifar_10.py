@@ -18,7 +18,7 @@ data_dir = "./cifardata"
 model_name = "alexnet"
 num_classes = 10
 batch_size = 32
-num_epochs = 15
+num_epochs = 1
 # True: feature extraction and False: fine tuning
 feature_extract = True
 
@@ -339,7 +339,7 @@ def run_NN():
     print(np.concatenate((train_loss_hist, val_loss_hist)))
     print(np.amax(np.concatenate((train_loss_hist, val_loss_hist))))
     ax1.set_ylim(
-        (0, 1.25 * np.amax(np.concatenate((train_loss_hist, val_loss_hist), axis=0, out=None)).cpu()))  # Sets y bounds
+        (0, 1.25 * np.amax(np.concatenate((train_loss_hist, val_loss_hist), axis=0, out=None)).detach.cpu()))  # Sets y bounds
     ax1.set_xticks(np.arange(1, num_epochs + 1, 1.0))
     ax1.legend()
 
