@@ -315,7 +315,8 @@ def run_NN():
 
     # Gives the best model (best weights)
     model, train_loss_hist, train_acc_hist, val_loss_hist, val_acc_hist = train_model(model=model, device=device,
-                                                                                      batch_size=32, learning_rate=0.001,
+                                                                                      batch_size=32,
+                                                                                      learning_rate=0.001,
                                                                                       train_set=train_set,
                                                                                       train_sampler=train_sampler,
                                                                                       val_sampler=val_sampler,
@@ -336,7 +337,7 @@ def run_NN():
     ax1.plot(range(1, len(train_loss_hist) + 1), train_loss_hist, label="Training")
     ax1.plot(range(1, len(val_loss_hist) + 1), val_loss_hist, label="Validation")
     ax1.set_ylim(
-        (0, int(1.25 * np.amax(np.concatenate((train_loss_hist, val_loss_hist), axis=0, out=None)))))  # Sets y bounds
+        (0, 1.25 * np.amax(np.concatenate((train_loss_hist, val_loss_hist), axis=0, out=None))))  # Sets y bounds
     ax1.set_xticks(np.arange(1, num_epochs + 1, 1.0))
     ax1.legend()
 
@@ -344,8 +345,8 @@ def run_NN():
     ax2.set(xlabel="Training Epoch", ylabel="Accuracy")
     ax2.plot(range(1, num_epochs + 1), train_acc_hist, label="Training")
     ax2.plot(range(1, num_epochs + 1), val_acc_hist, label="Validation")
-    ax2.set_ylim((0, int(
-        1.25 * np.amax(np.concatenate((train_acc_hist, val_acc_hist), axis=0, out=None)))))  # Sets y bounds
+    ax2.set_ylim((0,
+                  1.25 * np.amax(np.concatenate((train_acc_hist, val_acc_hist), axis=0, out=None))))  # Sets y bounds
     ax2.set_xticks(np.arange(1, num_epochs + 1, 1.0))
     ax2.legend()
 
