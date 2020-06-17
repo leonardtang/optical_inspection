@@ -306,10 +306,10 @@ def run_NN():
     if torch.cuda.is_available():
         print("cuda is available")
 
-        # Multiple GPUs
-        if torch.cuda.device_count() > 1:
-            model = nn.DataParallel(model)
-            print("Model wrapped in Data Parallel")
+        # # Multiple GPUs
+        # if torch.cuda.device_count() > 1:
+        #     model = nn.DataParallel(model)
+        #     print("Model wrapped in Data Parallel")
 
     model.to(device)
 
