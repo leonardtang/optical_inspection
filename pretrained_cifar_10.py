@@ -333,20 +333,20 @@ def run_NN():
 
     ax1.set_title("Loss vs. Number of Training Epochs")
     ax1.set(xlabel="Training Epoch", ylabel="Loss")
-    ax1.plot(range(1, len(train_loss_hist)), train_loss_hist, label="Training")
-    ax1.plot(range(1, len(val_loss_hist)), val_loss_hist, label="Validation")
+    ax1.plot(range(1, len(train_loss_hist) + 1), train_loss_hist, label="Training")
+    ax1.plot(range(1, len(val_loss_hist) + 1), val_loss_hist, label="Validation")
     ax1.set_ylim(
         (0, int(1.25 * np.amax(np.concatenate((train_loss_hist, val_loss_hist), axis=0, out=None)))))  # Sets y bounds
-    ax1.set_xticks(np.arange(1, num_epochs, 1.0))
+    ax1.set_xticks(np.arange(1, num_epochs + 1, 1.0))
     ax1.legend()
 
     ax2.set_title("Accuracy vs. Number of Training Epochs")
     ax2.set(xlabel="Training Epoch", ylabel="Accuracy")
-    ax2.plot(range(1, num_epochs), train_acc_hist, label="Training")
-    ax2.plot(range(1, num_epochs), val_acc_hist, label="Validation")
+    ax2.plot(range(1, num_epochs + 1), train_acc_hist, label="Training")
+    ax2.plot(range(1, num_epochs + 1), val_acc_hist, label="Validation")
     ax2.set_ylim((0, int(
         1.25 * np.amax(np.concatenate((train_acc_hist, val_acc_hist), axis=0, out=None)))))  # Sets y bounds
-    ax2.set_xticks(np.arange(1, num_epochs, 1.0))
+    ax2.set_xticks(np.arange(1, num_epochs + 1, 1.0))
     ax2.legend()
 
     plt.tight_layout()  # Call after plotting all subplots
