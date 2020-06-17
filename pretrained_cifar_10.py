@@ -39,15 +39,14 @@ def pre_processing_and_samples():
     train_set = torchvision.datasets.CIFAR10(root='./cifardata', train=True, download=True, transform=transform_train)
     test_set = torchvision.datasets.CIFAR10(root='./cifardata', train=False, download=True, transform=transform_test)
 
-    number_training_samples = 40000
+    number_training_samples = 50000
     train_sampler = SubsetRandomSampler(np.arange(number_training_samples, dtype=np.int64))
 
-    number_val_samples = 10000
-    val_sampler = SubsetRandomSampler(
-        np.arange(number_training_samples, number_training_samples + number_val_samples, dtype=np.int64))
+    number_val_samples = 5000
+    val_sampler = SubsetRandomSampler(np.arange(number_val_samples, dtype=np.int64))
 
-    number_test_samples = 10000
-    test_sampler = SubsetRandomSampler(np.arange(number_test_samples, dtype=np.int64))
+    number_test_samples = 5000
+    test_sampler = SubsetRandomSampler(np.arange(number_val_samples, number_val_samples + number_test_samples, dtype=np.int64))
 
     return [train_set, test_set, train_sampler, val_sampler, test_sampler]
 
@@ -58,8 +57,8 @@ def get_train_loader(batch_size, train_set, train_sampler):
     return train_loader
 
 
-def get_val_loader(train_set, val_sampler):
-    val_loader = torch.utils.data.DataLoader(train_set, batch_size=128, sampler=val_sampler, num_workers=8)
+def get_val_loader(train_set, test_set, val_sampler):
+    val_loader = torch.utils.data.DataLoader(test_set, batch_size=128, sampler=val_sampler, num_workers=8)
     return val_loader
 
 
@@ -147,7 +146,7 @@ model_ft, input_size = initialize_model(model_name, num_classes, feature_extract
 # print(model_ft)
 
 
-def train_model(model, device, batch_size, learning_rate, train_set, train_sampler, val_sampler, num_epochs=25,
+def train_model(model, device, batch_size, learning_rate, train_set, test_set, train_sampler, val_sampler, num_epochs=25,
                 is_inception=False):
     print("===== HYPERPARAMETERS =====")
     print("batch_size=", batch_size)
@@ -158,7 +157,7 @@ def train_model(model, device, batch_size, learning_rate, train_set, train_sampl
     train_loader = get_train_loader(batch_size, train_set, train_sampler)
     n_batches = len(train_loader)
     print_every = n_batches // 10
-    val_loader = get_val_loader(train_set, val_sampler)
+    val_loader = get_val_loader(train_set, test_set, val_sampler)
 
     # Default (if fine tuning): update all parameters
     params_to_update = model.parameters()
@@ -318,6 +317,7 @@ def run_NN():
                                                                                       batch_size=batch_size,
                                                                                       learning_rate=0.001,
                                                                                       train_set=train_set,
+                                                                                      test_set=test_set,
                                                                                       train_sampler=train_sampler,
                                                                                       val_sampler=val_sampler,
                                                                                       num_epochs=num_epochs)
