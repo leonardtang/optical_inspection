@@ -321,7 +321,7 @@ def run_NN():
                                                                                       val_sampler=val_sampler,
                                                                                       num_epochs=num_epochs)
 
-    print(model)
+    # print(model)
     print(train_loss_hist)
     print(train_acc_hist)
     print(val_loss_hist)
