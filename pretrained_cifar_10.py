@@ -300,7 +300,7 @@ def run_NN():
     """ Training and testing simple CNN architecture """
     [train_set, test_set, train_sampler, val_sampler, test_sampler] = pre_processing_and_samples()
     # Using GPU for training
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
     print(device)
     model = initialize_model(model_name=model_name, num_classes=num_classes, feature_extract=True)[0]
     if torch.cuda.is_available():
