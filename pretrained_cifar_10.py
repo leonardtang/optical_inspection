@@ -39,14 +39,14 @@ def pre_processing_and_samples():
     train_set = torchvision.datasets.CIFAR10(root='./cifardata', train=True, download=True, transform=transform_train)
     test_set = torchvision.datasets.CIFAR10(root='./cifardata', train=False, download=True, transform=transform_test)
 
-    number_training_samples = 50000
+    number_training_samples = 40000
     train_sampler = SubsetRandomSampler(np.arange(number_training_samples, dtype=np.int64))
 
-    number_val_samples = 5000
+    number_val_samples = 10000
     val_sampler = SubsetRandomSampler(
         np.arange(number_training_samples, number_training_samples + number_val_samples, dtype=np.int64))
 
-    number_test_samples = 5000
+    number_test_samples = 10000
     test_sampler = SubsetRandomSampler(np.arange(number_test_samples, dtype=np.int64))
 
     return [train_set, test_set, train_sampler, val_sampler, test_sampler]
