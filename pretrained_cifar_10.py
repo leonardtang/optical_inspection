@@ -315,7 +315,7 @@ def run_NN():
 
     # Gives the best model (best weights)
     model, train_loss_hist, train_acc_hist, val_loss_hist, val_acc_hist = train_model(model=model, device=device,
-                                                                                      batch_size=32,
+                                                                                      batch_size=batch_size,
                                                                                       learning_rate=0.001,
                                                                                       train_set=train_set,
                                                                                       train_sampler=train_sampler,
