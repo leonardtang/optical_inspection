@@ -339,7 +339,7 @@ def run_NN():
     print(np.concatenate((train_loss_hist, val_loss_hist)))
     print(np.amax(np.concatenate((train_loss_hist, val_loss_hist))))
     ax1.set_ylim(
-        (0, 1.25 * np.amax(np.concatenate((train_loss_hist, val_loss_hist), axis=0, out=None))))  # Sets y bounds
+        (0, 1.25 * np.amax(np.concatenate((train_loss_hist, val_loss_hist), axis=0, out=None)).cpu()))  # Sets y bounds
     ax1.set_xticks(np.arange(1, num_epochs + 1, 1.0))
     ax1.legend()
 
