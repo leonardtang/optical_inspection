@@ -231,8 +231,8 @@ def train_model(model, device, batch_size, learning_rate, train_set, train_sampl
 
         average_train_loss = training_loss / n_batches
         print("Average Training Loss: {:.2f}".format(average_train_loss))
-        average_train_accuracy = training_corrects / (n_batches * batch_size)
-        print("Training Accuracy: {:.2f}".format(average_train_accuracy))
+        average_train_accuracy = 100 * training_corrects / (n_batches * batch_size)
+        print("Training Accuracy: % d %%" % average_train_accuracy)
         train_loss_history.append(average_train_loss)
         train_acc_history.append(average_train_accuracy)
 
@@ -291,7 +291,9 @@ def test(model, device, test_set, test_sampler):
             correct += (predicted == labels).double().sum().item()  # Double corrects for testing batch size
             total += labels.size(0)  # labels is a Tensor with dimension [N,1], where N is batch sample size
 
-    print('Testing accuracy = % d %%' % (100 * correct / total))
+    testing_accuracy = 100 * correct / total
+    print('Testing accuracy = % d %%' % testing_accuracy)
+    return testing_accuracy
 
 
 def run_NN():
@@ -326,15 +328,29 @@ def run_NN():
     print(val_acc_hist)
 
     # USE VISDOM HERE INSTEAD
-    # # Plot performance over training epochs
-    # plt.title("Validation Accuracy vs. Number of Training Epochs")
-    # plt.xlabel("Training Epochs")
-    # plt.ylabel("Validation Accuracy")
-    # plt.plot(range(1, num_epochs + 1), train_loss_hist, label="Pretrained")
-    # plt.ylim((0, 1.))
-    # plt.xticks(np.arange(1, num_epochs + 1, 1.0))
-    # plt.legend()
-    # plt.show()
+
+    fig, (ax1, ax2) = plt.subplots(2)
+
+    ax1.set_title("Loss vs. Number of Training Epochs")
+    ax1.set(xlabel="Training Epoch", ylabel="Loss")
+    ax1.plot(range(1, len(train_loss_hist)), train_loss_hist, label="Training")
+    ax1.plot(range(1, len(val_loss_hist)), val_loss_hist, label="Validation")
+    ax1.set_ylim(
+        (0, int(1.25 * np.amax(np.concatenate((train_loss_hist, val_loss_hist), axis=0, out=None)))))  # Sets y bounds
+    ax1.set_xticks(np.arange(1, num_epochs, 1.0))
+    ax1.legend()
+
+    ax2.set_title("Accuracy vs. Number of Training Epochs")
+    ax2.set(xlabel="Training Epoch", ylabel="Accuracy")
+    ax2.plot(range(1, num_epochs), train_acc_hist, label="Training")
+    ax2.plot(range(1, num_epochs), val_acc_hist, label="Validation")
+    ax2.set_ylim((0, int(
+        1.25 * np.amax(np.concatenate((train_acc_hist, val_acc_hist), axis=0, out=None)))))  # Sets y bounds
+    ax2.set_xticks(np.arange(1, num_epochs, 1.0))
+    ax2.legend()
+
+    plt.tight_layout()  # Call after plotting all subplots
+    plt.savefig(model_name + ("_finetune_" if not feature_extract else "_feature_extract_") + 'pretrained_cifar_10.png')
 
     test(model=model, device=device, test_set=test_set, test_sampler=test_sampler)
 
