@@ -31,7 +31,7 @@ def pre_processing_and_samples():
     classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
     # Training sampler -- holds random indices later used to access training set
-    number_training_samples = 200
+    number_training_samples = 2000
     train_sampler = SubsetRandomSampler(np.arange(number_training_samples, dtype=np.int64))
 
     # Validation sampler
@@ -67,20 +67,20 @@ class SimpleCNN(torch.nn.Module):
                                      padding=1)  # --> (32, 32, 32)
         self.pool = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)  # --> (32, 16, 16)
 
-        self.dropOut = torch.nn.Dropout(p=0.5)
+        # self.dropOut = torch.nn.Dropout(p=0.5)
 
         self.conv2 = torch.nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=1,
                                      padding=1)  # --> (64, 16, 16)
 
         self.pool = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)  # --> (64, 8, 8)
 
-        self.dropOut = torch.nn.Dropout(p=0.5)
+        # self.dropOut = torch.nn.Dropout(p=0.5)
 
         self.conv3 = torch.nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, stride=1,
                                      padding=1)  # --> (128, 8, 8)
         self.pool = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)  # --> (128, 4, 4)
 
-        self.dropOut = torch.nn.Dropout(p=0.5)
+        # self.dropOut = torch.nn.Dropout(p=0.5)
 
         # Classification -- 18 in channels with 16 x 16 pixel-sized images = 4608 input nodes
         # 64 output nodes
