@@ -31,18 +31,18 @@ def pre_processing_and_samples():
     classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
     # Training sampler -- holds random indices later used to access training set
-    number_training_samples = 20000
+    number_training_samples = 200
     train_sampler = SubsetRandomSampler(np.arange(number_training_samples, dtype=np.int64))
 
     # Validation sampler
     # The range is not (0, n) since the indices here are part of one training dataset
     number_val_samples = 5000
     val_sampler = SubsetRandomSampler(
-        np.arange(number_training_samples, number_training_samples + number_val_samples, dtype=np.int64))
+        np.arange(number_val_samples, dtype=np.int64))
 
     # Test sampler
     number_test_samples = 5000
-    test_sampler = SubsetRandomSampler(np.arange(number_test_samples, dtype=np.int64))
+    test_sampler = SubsetRandomSampler(np.arange(number_val_samples, number_val_samples + number_test_samples, dtype=np.int64))
 
     return [train_set, test_set, train_sampler, val_sampler, test_sampler]
 
@@ -123,8 +123,8 @@ def get_train_loader(batch_size, train_set, train_sampler):
 
 
 # Why does val loader have a constant batch size?
-def get_val_loader(train_set, val_sampler):
-    val_loader = torch.utils.data.DataLoader(train_set, batch_size=128, sampler=val_sampler, num_workers=4)
+def get_val_loader(train_set, test_set, val_sampler):
+    val_loader = torch.utils.data.DataLoader(test_set, batch_size=128, sampler=val_sampler, num_workers=4)
     return val_loader
 
 
@@ -134,7 +134,7 @@ def get_test_loader(test_set, test_sampler):
     return test_loader
 
 
-def trainCNN(net, device, batch_size, n_epochs, learning_rate, train_set, train_sampler, val_sampler):
+def trainCNN(net, device, batch_size, n_epochs, learning_rate, train_set, test_set, train_sampler, val_sampler):
     """ The full training process (i.e. not just one iteration) """
 
     print("===== HYPERPARAMETERS =====")
@@ -206,7 +206,7 @@ def trainCNN(net, device, batch_size, n_epochs, learning_rate, train_set, train_
         # Passing through validation
         net.eval()
         epoch_val_loss = 0  # Validation loss for the epoch
-        val_loader = get_val_loader(train_set, val_sampler)
+        val_loader = get_val_loader(test_set, val_sampler)
         val_correct = 0
         val_total = 0
         with torch.no_grad():
@@ -273,7 +273,7 @@ def run_simple_CNN():
 
     train_loss_hist, train_acc_hist, val_loss_hist, val_acc_hist = \
         trainCNN(net=CNN, device=device, batch_size=64, n_epochs=num_epochs, learning_rate=0.001,
-                 train_set=train_set, train_sampler=train_sampler, val_sampler=val_sampler)
+                 train_set=train_set, test_set=test_set, train_sampler=train_sampler, val_sampler=val_sampler)
     test(net=CNN, device=device, test_set=test_set, test_sampler=test_sampler)
 
     fig, (ax1, ax2) = plt.subplots(2)
