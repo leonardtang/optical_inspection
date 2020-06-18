@@ -5,6 +5,7 @@ import torchvision
 import torchvision.transforms as transforms
 import torch.nn.functional as F
 import torch.optim as optim
+import matplotlib.pyplot as plt
 from torch.utils.data.sampler import SubsetRandomSampler
 from torch import nn
 
@@ -36,7 +37,8 @@ def pre_processing_and_samples():
     # Validation sampler
     # The range is not (0, n) since the indices here are part of one training dataset
     number_val_samples = 5000
-    val_sampler = SubsetRandomSampler(np.arange(number_training_samples, number_training_samples + number_val_samples, dtype=np.int64))
+    val_sampler = SubsetRandomSampler(
+        np.arange(number_training_samples, number_training_samples + number_val_samples, dtype=np.int64))
 
     # Test sampler
     number_test_samples = 5000
@@ -61,11 +63,14 @@ class SimpleCNN(torch.nn.Module):
 
         # Feature extraction
         # Channels =/= input/output (channels is number of filter outputs; need to worry about FILTER dimensions)
-        self.conv1 = torch.nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, stride=1, padding=1)  # --> (32, 32, 32)
+        self.conv1 = torch.nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, stride=1,
+                                     padding=1)  # --> (32, 32, 32)
         self.pool = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)  # --> (32, 16, 16)
-        self.conv2 = torch.nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=1, padding=1)  # --> (64, 16, 16)
+        self.conv2 = torch.nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=1,
+                                     padding=1)  # --> (64, 16, 16)
         self.pool = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)  # --> (64, 8, 8)
-        self.conv3 = torch.nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, stride=1,padding=1)  # --> (128, 8, 8)
+        self.conv3 = torch.nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, stride=1,
+                                     padding=1)  # --> (128, 8, 8)
         self.pool = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)  # --> (128, 4, 4)
 
         # Classification -- 18 in channels with 16 x 16 pixel-sized images = 4608 input nodes
@@ -138,12 +143,19 @@ def trainCNN(net, device, batch_size, n_epochs, learning_rate, train_set, train_
 
     training_start_time = time.time()
 
+    val_loss_history = []
+    val_acc_history = []
+    train_loss_history = []
+    train_acc_history = []
+
     # Actual training begins
     for epoch in range(n_epochs):
         print('Epoch {}/{}'.format(epoch + 1, n_epochs))
         print('-' * 10)
 
         net.train()  # Dictates dropout, batchnorm, etc. behavior
+        training_loss = 0.0
+        training_corrects = 0
         running_loss = 0.0  # Holds loss across each epoch
         print_every = n_batches // 10
         start_time = time.time()
@@ -160,6 +172,8 @@ def trainCNN(net, device, batch_size, n_epochs, learning_rate, train_set, train_
 
             # Batch output -- output(S)
             outputs = net(inputs)
+            _, predicted = torch.max(outputs.detach(), dim=1)
+            training_corrects += (predicted == labels).double().sum().item()
             loss_size = loss(outputs, labels)  # Sum across individual losses
             loss_size.backward()  # Backprop
             optimizer.step()  # Adam step
@@ -170,8 +184,15 @@ def trainCNN(net, device, batch_size, n_epochs, learning_rate, train_set, train_
                 print("Epoch {}, {:d}% \t train_loss: {:.2f} took: {:.2f}s".format(
                     epoch + 1, int(100 * (i + 1) / n_batches), running_loss / print_every, time.time() - start_time))
                 # Reset running loss and time
+                training_loss += running_loss  # Add loss to training_loss for epoch
                 running_loss = 0.0
                 start_time = time.time()
+
+        average_train_loss = training_loss / n_batches
+        average_train_acc = 100 * training_corrects / (n_batches * batch_size)
+
+        print("Train loss = {:.2f}".format(average_train_loss))
+        print("Train accuracy = % d %%" % average_train_acc)
 
         # Passing through validation
         net.eval()
@@ -190,10 +211,19 @@ def trainCNN(net, device, batch_size, n_epochs, learning_rate, train_set, train_
                 val_correct += (predicted == labels).double().sum().item()
                 val_total += labels.size(0)
 
-            print("Validation loss = {:.2f}".format(epoch_val_loss / len(val_loader)))
-            print("Validation accuracy = % d %%" % (100 * val_correct / val_total))
+            average_val_loss = epoch_val_loss / len(val_loader)
+            val_accuracy = 100 * val_correct / val_total
+            print("Validation loss = {:.2f}".format(average_val_loss))
+            print("Validation accuracy = % d %%" % val_accuracy)
 
-        print("Training finished, took {:.2f}s".format(time.time() - training_start_time))
+        train_loss_history.append(average_train_loss)
+        train_acc_history.append(average_train_acc)
+        val_loss_history.append(average_val_loss)
+        val_acc_history.append(val_accuracy)
+
+    print("Training finished, took {:.2f}s".format(time.time() - training_start_time))
+
+    return train_loss_history, train_acc_history, val_loss_history, val_acc_history
 
 
 def test(net, device, test_set, test_sampler):
@@ -230,12 +260,37 @@ def run_simple_CNN():
     if torch.cuda.device_count() > 1:
         CNN = nn.DataParallel(CNN)
 
-    trainCNN(net=CNN, device=device, batch_size=32, n_epochs=20, learning_rate=0.001,
-             train_set=train_set, train_sampler=train_sampler, val_sampler=val_sampler)
+    num_epochs = 20
+
+    train_loss_hist, train_acc_hist, val_loss_hist, val_acc_hist = \
+        trainCNN(net=CNN, device=device, batch_size=64, n_epochs=num_epochs, learning_rate=0.001,
+                 train_set=train_set, train_sampler=train_sampler, val_sampler=val_sampler)
     test(net=CNN, device=device, test_set=test_set, test_sampler=test_sampler)
+
+    fig, (ax1, ax2) = plt.subplots(2)
+
+    ax1.set_title("Loss vs. Number of Training Epochs")
+    ax1.set(xlabel="Training Epoch", ylabel="Loss")
+    ax1.plot(range(1, len(train_loss_hist) + 1), train_loss_hist, label="Training")
+    ax1.plot(range(1, len(val_loss_hist) + 1), val_loss_hist, label="Validation")
+    print(np.concatenate((train_loss_hist, val_loss_hist)))
+    print(np.amax(np.concatenate((train_loss_hist, val_loss_hist))))
+    ax1.set_ylim(
+        (0, 1.25 * np.amax(np.concatenate((train_loss_hist, val_loss_hist), axis=0, out=None)).detach().cpu()))
+    ax1.set_xticks(np.arange(1, num_epochs + 1, 1.0))
+    ax1.legend()
+
+    ax2.set_title("Accuracy vs. Number of Training Epochs")
+    ax2.set(xlabel="Training Epoch", ylabel="Accuracy")
+    ax2.plot(range(1, num_epochs + 1), train_acc_hist, label="Training")
+    ax2.plot(range(1, num_epochs + 1), val_acc_hist, label="Validation")
+    ax2.set_ylim(0, 100)  # Sets y bounds
+    ax2.set_xticks(np.arange(1, num_epochs + 1, 1.0))
+    ax2.legend()
+
+    plt.tight_layout()  # Call after plotting all subplots
+    plt.savefig('basic_cifar_10.png')
 
 
 if __name__ == "__main__":
-
     run_simple_CNN()
-
