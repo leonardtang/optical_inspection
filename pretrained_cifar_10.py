@@ -183,7 +183,7 @@ def train_model(model, device, batch_size, learning_rate, train_set, test_set, t
     best_acc = 0.0
 
     # Handles optimizing different layers
-    optimizer = optim.adam(params_to_update, lr=learning_rate)
+    optimizer = optim.Adam(params_to_update, lr=learning_rate)
     criterion = nn.CrossEntropyLoss()
 
     for epoch in range(num_epochs):
