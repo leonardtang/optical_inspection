@@ -260,7 +260,7 @@ def run_simple_CNN():
     if torch.cuda.device_count() > 1:
         CNN = nn.DataParallel(CNN)
 
-    num_epochs = 20
+    num_epochs = 100
 
     train_loss_hist, train_acc_hist, val_loss_hist, val_acc_hist = \
         trainCNN(net=CNN, device=device, batch_size=64, n_epochs=num_epochs, learning_rate=0.001,
