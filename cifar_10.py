@@ -123,7 +123,7 @@ def get_train_loader(batch_size, train_set, train_sampler):
 
 
 # Why does val loader have a constant batch size?
-def get_val_loader(train_set, test_set, val_sampler):
+def get_val_loader(test_set, val_sampler):
     val_loader = torch.utils.data.DataLoader(test_set, batch_size=128, sampler=val_sampler, num_workers=4)
     return val_loader
 
