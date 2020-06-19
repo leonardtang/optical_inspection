@@ -94,11 +94,11 @@ class SimpleCNN(torch.nn.Module):
         # 64 output nodes
         self.fc1 = torch.nn.Linear(128 * 4 * 4, 64)
 
-        self.batch4 = torch.nn.BatchNorm2d(64)
+        self.batch4 = torch.nn.BatchNorm1d(64)
 
         self.fc2 = torch.nn.Linear(64, 10)
 
-        self.batch5 = torch.nn.BatchNorm2d(10)
+        self.batch5 = torch.nn.BatchNorm1d(10)
 
         # 10 inputs = 10 outputs
         self.output = torch.nn.Softmax(dim=1)  # Usually use dim = 1; means across (row)
