@@ -65,6 +65,9 @@ class SimpleCNN(torch.nn.Module):
         # Channels =/= input/output (channels is number of filter outputs; need to worry about FILTER dimensions)
         self.conv1 = torch.nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, stride=1,
                                      padding=1)  # --> (32, 32, 32)
+
+        self.batch1 = torch.nn.BatchNorm2d(32)
+
         self.pool = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)  # --> (32, 16, 16)
 
         # self.dropOut = torch.nn.Dropout(p=0.5)
@@ -72,20 +75,30 @@ class SimpleCNN(torch.nn.Module):
         self.conv2 = torch.nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=1,
                                      padding=1)  # --> (64, 16, 16)
 
-        self.pool = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)  # --> (64, 8, 8)
+        self.batch2 = torch.nn.BatchNorm2d(64)
+
+        self.pool2 = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)  # --> (64, 8, 8)
 
         # self.dropOut = torch.nn.Dropout(p=0.5)
 
         self.conv3 = torch.nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, stride=1,
                                      padding=1)  # --> (128, 8, 8)
-        self.pool = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)  # --> (128, 4, 4)
+
+        self.batch3 = torch.nn.BatchNorm2d(128)
+
+        self.pool3 = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)  # --> (128, 4, 4)
 
         # self.dropOut = torch.nn.Dropout(p=0.5)
 
         # Classification -- 18 in channels with 16 x 16 pixel-sized images = 4608 input nodes
         # 64 output nodes
         self.fc1 = torch.nn.Linear(128 * 4 * 4, 64)
+
+        self.batch4 = torch.nn.BatchNorm2d(64)
+
         self.fc2 = torch.nn.Linear(64, 10)
+
+        self.batch5 = torch.nn.BatchNorm2d(10)
 
         # 10 inputs = 10 outputs
         self.output = torch.nn.Softmax(dim=1)  # Usually use dim = 1; means across (row)
@@ -93,27 +106,27 @@ class SimpleCNN(torch.nn.Module):
     def forward(self, x):
         # Pass through convolutional layer 1
         x = self.conv1(x)
-        x = F.batch_norm(x)
+        x = self.batch1(x)
         x = F.relu(x)
         x = self.pool(x)
 
         x = self.conv2(x)
-        x = F.batch_norm(x)
+        x = self.batch2(x)
         x = F.relu(x)
-        x = self.pool(x)
+        x = self.pool2(x)
 
         x = self.conv3(x)
-        x = F.batch_norm(x)
+        x = self.batch3(x)
         x = F.relu(x)
-        x = self.pool(x)
+        x = self.pool3(x)
 
         # Need to flatten data from 18 channels to 4608 input nodes, i.e. (18, 16, 16) --> (1, 4608)
         x = x.view(-1, 128 * 4 * 4)
         x = self.fc1(x)
-        x = F.batch_norm(x)
+        x = self.batch4(x)
 
         x = self.fc2(x)
-        x = F.batch_norm(x)
+        x = self.batch5(x)
         x = self.output(x)
         return x
 
